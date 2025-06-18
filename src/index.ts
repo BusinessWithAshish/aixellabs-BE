@@ -14,7 +14,7 @@ app.use(cors({
 }))
 app.use(express.json())
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8100;
 
 app.listen(PORT, () => {
   console.log(`AixelLabs server is running... on port ${PORT}`);
