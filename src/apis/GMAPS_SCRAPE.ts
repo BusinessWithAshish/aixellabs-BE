@@ -1,7 +1,9 @@
 import z from "zod";
 import { Request, Response } from 'express'
 import { generateGoogleMapsUrls } from "../utils/helpers";
-import { GMAPS_SCRAPPER } from "../functions/gmaps-scrapper";
+import { BrowserBatchHandler } from "../functions/common/browser-batch-handler";
+import {scrapeLinks} from "../functions/scrape-links";
+import {GmapsDetailsLeadInfoExtractor} from "../functions/gmap-details-lead-extractor";
 
 export const POSTv2ScrapeSchema = z.object({
   query: z.string(),
@@ -13,7 +15,7 @@ export const POSTv2ScrapeSchema = z.object({
 });
 export type TPOSTv2ScrapeSchema = z.infer<typeof POSTv2ScrapeSchema>;
 
-export const POSTV2Scrape =  async (req: Request, res: Response) => {
+export const GMAPS_SCRAPE =  async (req: Request, res: Response) => {
 
   const requestBody = req.body;
 
@@ -31,6 +33,14 @@ export const POSTV2Scrape =  async (req: Request, res: Response) => {
     return;
   }
 
-  const scrappedData = await GMAPS_SCRAPPER(finalScrappingUrls);
-  res.send({ success: scrappedData.success, data: scrappedData.results, ...(scrappedData.error && { error: scrappedData.error }) });
+  const scrappedData = await BrowserBatchHandler(finalScrappingUrls, scrapeLinks);
+  const allScrapingUrls = scrappedData.results.flat();
+  const allLeads = await BrowserBatchHandler(allScrapingUrls, GmapsDetailsLeadInfoExtractor);
+
+  res.send({
+    foundedLeads: scrappedData,
+    foundedLeadsCount: scrappedData.results.length,
+    actualLeads: allLeads,
+    actualLeadsCount: allLeads.results.flat().length,
+  });
 };

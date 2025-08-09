@@ -1,7 +1,6 @@
 // @ts-nocheck
-
 import { Db, Collection } from 'mongodb';
-import { TGoogleMapItem, TGoogleMapLeadInfo } from "./scrape-map-item-v1";
+import {TGoogleMapItem, TGoogleMapLeadInfo} from "./gmap-details-lead-extractor";
 
 // Helper function to convert scraped data to your DB format
 const formatLeadsForDB = (scrapeData: TGoogleMapItem[]): TGoogleMapLeadInfo[] => {
@@ -82,9 +81,10 @@ const upsertScrapingResults = async (
 
     if (cityIndex === -1) {
       await collection.updateOne(
-        { state },
-        {
-          $push: {
+          { state },
+          {
+            // @ts-ignore
+            $push: {
             cities: {
               city_name: city,
               queries: [{
@@ -107,9 +107,10 @@ const upsertScrapingResults = async (
 
     if (queryIndex === -1) {
       await collection.updateOne(
-        { state, "cities.city_name": city },
-        {
-          $push: {
+          { state, "cities.city_name": city },
+          {
+            // @ts-ignore
+            $push: {
             "cities.$.queries": {
               search_query: query,
               query_slug: querySlug,
@@ -124,6 +125,7 @@ const upsertScrapingResults = async (
       await collection.updateOne(
         { state, "cities.city_name": city, "cities.queries.query_slug": querySlug },
         {
+          //@ts-ignore
           $push: { "cities.$[city].queries.$[query].leads": { $each: formattedLeads } },
           $set: { timestamp: formatTimestamp() }
         },

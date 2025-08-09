@@ -1,6 +1,5 @@
-import { TPOSTv1ScrapeSchema } from "../apis/POST-v1-scrape";
-
-export const GOOGLE_MAPS_BASE_URL = 'https://www.google.com/maps/search/';
+import {TPOSTv2ScrapeSchema} from "../apis/GMAPS_SCRAPE";
+import {GOOGLE_MAPS_BASE_URL} from "./constants";
 
 function createGoogleMapsUrl(query: string, city: string, state: string, country: string) {
   // Clean and format the query
@@ -27,7 +26,7 @@ export type TGoogleMapsUrls = {
   url: string;
 };
 
-export function generateGoogleMapsUrls(data: TPOSTv1ScrapeSchema) {
+export function generateGoogleMapsUrls(data: TPOSTv2ScrapeSchema) {
   const urls: TGoogleMapsUrls[] = [];
 
   data.states.forEach(state => {
@@ -43,5 +42,5 @@ export function generateGoogleMapsUrls(data: TPOSTv1ScrapeSchema) {
     });
   });
 
-  return urls;
+  return urls.map(url => url.url);
 }
