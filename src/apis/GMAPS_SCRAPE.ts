@@ -40,7 +40,7 @@ export const GMAPS_SCRAPE =  async (req: Request, res: Response) => {
   res.send({
     foundedLeads: scrappedData,
     foundedLeadsCount: scrappedData.results.length,
-    actualLeads: allLeads,
+    actualLeads: allLeads.results.flat(),
     actualLeadsCount: allLeads.results.flat().length,
   });
 };
