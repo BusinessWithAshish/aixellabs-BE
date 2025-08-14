@@ -24,12 +24,7 @@ export const gmapsSetupRequestInterception = async (page: Page) => {
             resourceType === 'font' ||
             resourceType === 'image' ||
             resourceType === 'media' ||
-            url.includes('fonts.googleapis.com') ||
-            url.includes('fonts.gstatic.com') ||
             url.includes('.css') ||
-            url.includes('.woff') ||
-            url.includes('.woff2') ||
-            url.includes('.ttf') ||
             url.includes('.eot') ||
             url.includes('analytics') ||
             url.includes('google-analytics') ||
