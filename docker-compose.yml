@@ -1,9 +1,16 @@
+version: '3.8'
+
 services:
-  puppeteer-in-docker:
-    build: .
+  puppeteer-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
     ports:
-      - "8080:8080"
-    environment:
-      NODE_ENV: "production"
-      CHROMIUM_PATH: "/usr/bin/chromium"
-      PORT: "8080"
+      - "8100:8100"  # Map port 80 to your app's port 8100
+    env_file:
+      - .env  # Use .env file
+    init: true
+    cap_add:
+      - SYS_ADMIN
+    restart: unless-stopped

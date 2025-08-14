@@ -1,46 +1,85 @@
-FROM node:20-slim AS builder
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# ====================
+# Base Stage
+# ====================
+FROM node:18-alpine AS base
 
 WORKDIR /app
 
-USER root
+# Install pnpm globally
+RUN npm install -g pnpm
 
-COPY package*.json ./
-COPY tsconfig.json ./
 
-RUN npm ci
+# ====================
+# Build Stage
+# ====================
+FROM base AS builder
 
+# Copy package files for dependency caching
+COPY package.json pnpm-lock.yaml* ./
+
+# Skip Chromium download during install
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+# Install ALL dependencies (with dev) for building
+RUN pnpm install
+
+# Copy source code
 COPY . .
 
-RUN npm run build
+# Build TypeScript -> dist
+RUN pnpm build
 
-FROM node:20-slim AS runner
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    chromium \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    && rm -rf /var/lib/apt/lists/*
+# ====================
+# Dependencies Stage
+# ====================
+FROM base AS deps
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    NODE_ENV=production
+COPY package.json pnpm-lock.yaml* ./
 
-WORKDIR /app
+# Skip Chromium download during install
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+# Install only production dependencies
+RUN pnpm install --prod && \
+    pnpm store prune
+
+
+# ====================
+# Production Stage
+# ====================
+FROM node:18-alpine AS production
 
 USER root
+WORKDIR /app
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
+# Install system Chromium + curl for health checks
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      curl
 
-EXPOSE 8080
+# Puppeteer expects Chromium here
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Copy production dependencies
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/package.json ./package.json
+
+# Switch to non-root
+USER node
+
+EXPOSE 8100
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD curl -f http://localhost:8100/v1/ping || exit 1
 
 CMD ["node", "dist/index.js"]

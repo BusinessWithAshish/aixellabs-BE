@@ -1,4 +1,4 @@
-import { LaunchOptions } from "puppeteer-core";
+import { LaunchOptions } from "puppeteer";
 import { config } from "dotenv";
 config();
 
@@ -97,7 +97,8 @@ export const getBrowserOptions = async (): Promise<LaunchOptions> => {
 
   return {
     channel: 'chrome',
-    headless: false,
+    headless: process.env.NODE_ENV !== 'production',
+    executablePath: process.env.NODE_ENV === 'production' ? '/usr/bin/chromium' : undefined,
     defaultViewport: null,
     args: [...optimisedBrowserArgs],
     timeout: 60000

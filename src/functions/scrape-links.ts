@@ -1,4 +1,4 @@
-import {Page} from "puppeteer-core";
+import {Page} from "puppeteer";
 import {DEFAULT_PAGE_LOAD_TIMEOUT} from "../utils/constants";
 
 export const scrapeLinks = async (url: string, page: Page): Promise<string[]> => {

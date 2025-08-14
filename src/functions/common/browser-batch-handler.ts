@@ -1,4 +1,4 @@
-import puppeteer, {Browser, Page} from "puppeteer-core";
+import puppeteer, {Browser, Page} from "puppeteer";
 import {getBrowserOptions} from "../../utils/browser";
 import {config} from "dotenv";
 
