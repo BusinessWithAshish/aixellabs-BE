@@ -22,14 +22,14 @@ export const GMAPS_SCRAPE =  async (req: Request, res: Response) => {
   const parsedBody = POSTv2ScrapeSchema.safeParse(requestBody);
 
   if (!parsedBody.success) {
-    res.status(400).json({ error: "Invalid query parameters" });
+    res.status(400).json({ success: false, error: "Invalid query parameters" });
     return;
   }
 
   const finalScrappingUrls = generateGoogleMapsUrls(parsedBody.data);
 
   if (finalScrappingUrls.length === 0) {
-    res.status(400).json({ error: "No URLs provided" });
+    res.status(400).json({ success: false, error: "No URLs provided" });
     return;
   }
 
@@ -37,10 +37,13 @@ export const GMAPS_SCRAPE =  async (req: Request, res: Response) => {
   const allScrapingUrls = scrappedData.results.flat();
   const allLeads = await BrowserBatchHandler(allScrapingUrls, GmapsDetailsLeadInfoExtractor);
 
-  res.send({
-    foundedLeads: scrappedData,
-    foundedLeadsCount: scrappedData.results.length,
-    actualLeads: allLeads.results.flat(),
-    actualLeadsCount: allLeads.results.flat().length,
-  });
+  res.status(200).json({
+    success: true,
+    data: {
+      foundedLeads: scrappedData,
+      foundedLeadsCount: scrappedData.results.flat(2).length,
+      actualLeads: allLeads.results.flat(2),
+      actualLeadsCount: allLeads.results.flat(2).length,
+    }
+  })
 };
