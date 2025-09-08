@@ -33,17 +33,18 @@ export const GMAPS_SCRAPE =  async (req: Request, res: Response) => {
     return;
   }
 
-  const scrappedData = await BrowserBatchHandler(finalScrappingUrls, scrapeLinks);
-  const allScrapingUrls = scrappedData.results.flat();
-  const allLeads = await BrowserBatchHandler(allScrapingUrls, GmapsDetailsLeadInfoExtractor);
+  const foundedLeads = await BrowserBatchHandler(finalScrappingUrls, scrapeLinks);
+  const foundedLeadsResults = foundedLeads.results.flat()
+  const allLeads = await BrowserBatchHandler(foundedLeadsResults, GmapsDetailsLeadInfoExtractor);
+  const allLeadsResults = allLeads.results.flat()
 
   res.status(200).json({
     success: true,
     data: {
-      foundedLeads: scrappedData,
-      foundedLeadsCount: scrappedData.results.flat(2).length,
-      actualLeads: allLeads.results.flat(2),
-      actualLeadsCount: allLeads.results.flat(2).length,
+      founded: foundedLeadsResults,
+      foundedLeadsCount:foundedLeadsResults.length,
+      allLeads: allLeadsResults,
+      allLeadsCount: allLeadsResults.length
     }
   })
 };
