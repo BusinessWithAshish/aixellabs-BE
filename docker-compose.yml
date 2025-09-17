@@ -15,18 +15,6 @@ services:
     # Essential for Puppeteer on EC2
     cap_add:
       - SYS_ADMIN
-    
-    # Memory and resource limits
-    shm_size: '1gb'  # Increase shared memory
-    mem_limit: '4g'  # Set memory limit
-    
-    # Security options for Chrome
-    security_opt:
-      - seccomp:unconfined
-    
-    # Environment variables
-    environment:
-      - NODE_ENV=production
       
     restart: unless-stopped
     
