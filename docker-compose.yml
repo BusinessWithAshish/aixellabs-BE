@@ -7,10 +7,33 @@ services:
       dockerfile: Dockerfile
       target: production
     ports:
-      - "80:8100"  # Map port 80 to your app's port 8100
+      - "80:8100"
     env_file:
-      - .env  # Use .env file
+      - .env
     init: true
+    
+    # Essential for Puppeteer on EC2
     cap_add:
       - SYS_ADMIN
+    
+    # Memory and resource limits
+    shm_size: '1gb'  # Increase shared memory
+    mem_limit: '4g'  # Set memory limit
+    
+    # Security options for Chrome
+    security_opt:
+      - seccomp:unconfined
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      
     restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/v1/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
