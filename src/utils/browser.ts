@@ -14,7 +14,6 @@ export const optimisedBrowserArgs = [
   '--disable-default-apps',
   '--disable-extensions',
   '--start-maximized',
-  '--disable-accelerated-2d-canvas',
   '--no-first-run',
   '--no-zygote',
   '--disable-dev-tools',
@@ -77,14 +76,11 @@ export const optimisedBrowserArgs = [
   '--disable-device-discovery-notifications',
   '--disable-renderer-accessibility',
   '--disable-pdf-extension',
-  '--disable-reading-from-canvas',
   '--disable-remote-extensions',
   '--disable-shared-workers',
   '--disable-speech-synthesis-api',
   '--hide-scrollbars',
   '--mute-audio',
-  '--disable-canvas-aa',
-  '--disable-2d-canvas-clip-aa',
   '--disable-gl-extensions',
   '--disable-webgl-extensions',
   '--disable-webgl-image-chromium',
@@ -95,21 +91,10 @@ export const optimisedBrowserArgs = [
 
 export const getBrowserOptions = async (): Promise<LaunchOptions> => {
   const isProduction = process.env.NODE_ENV === 'production';
-  // Use the environment variable set in Dockerfile, fallback to default path
-  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || (isProduction ? '/usr/bin/chromium-browser' : undefined);
-  
-  console.log("🔧 Browser Options:", {
-    isProduction,
-    executablePath,
-    puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-    headless: isProduction ? 'shell' : false,
-    argsCount: optimisedBrowserArgs.length
-  });
 
   return {
     channel: 'chrome',
     headless: isProduction ? 'shell' : false,
-    executablePath: executablePath,
     defaultViewport: null,
     args: [...optimisedBrowserArgs],
     timeout: 60000

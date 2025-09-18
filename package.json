@@ -1,5 +1,5 @@
 {
-  "name": "gmaps",
+  "name": "aixellabs",
   "version": "1.0.0",
   "description": "Internal Google Maps scraping API server",
   "main": "dist/index.js",
