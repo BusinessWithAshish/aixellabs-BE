@@ -95,11 +95,13 @@ export const optimisedBrowserArgs = [
 
 export const getBrowserOptions = async (): Promise<LaunchOptions> => {
   const isProduction = process.env.NODE_ENV === 'production';
-  const executablePath = isProduction ? '/usr/bin/chromium-browser' : undefined;
+  // Use the environment variable set in Dockerfile, fallback to default path
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || (isProduction ? '/usr/bin/chromium-browser' : undefined);
   
   console.log("🔧 Browser Options:", {
     isProduction,
     executablePath,
+    puppeteerExecutablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     headless: isProduction ? 'shell' : false,
     argsCount: optimisedBrowserArgs.length
   });
