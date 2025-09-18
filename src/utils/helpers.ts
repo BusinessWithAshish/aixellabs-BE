@@ -1,4 +1,4 @@
-import {TPOSTv2ScrapeSchema} from "../apis/GMAPS_SCRAPE";
+import {GmapsScrape} from "../apis/GMAPS_SCRAPE";
 import {GOOGLE_MAPS_BASE_URL} from "./constants";
 
 function createGoogleMapsUrl(query: string, city: string, state: string, country: string) {
@@ -26,7 +26,7 @@ export type TGoogleMapsUrls = {
   url: string;
 };
 
-export function generateGoogleMapsUrls(data: TPOSTv2ScrapeSchema) {
+export function generateGoogleMapsUrls(data: GmapsScrape) {
   const urls: TGoogleMapsUrls[] = [];
 
   data.states.forEach(state => {

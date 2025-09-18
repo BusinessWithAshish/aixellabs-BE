@@ -35,13 +35,16 @@ const processSingleBrowser = async <T>(
     console.log(`🚀 Launching Browser ${browserIndex} for ${urlItems.length} URLs...`);
 
     const browserOptions = await getBrowserOptions();
+    console.log(`🔧 Browser ${browserIndex}: Launch options:`, JSON.stringify(browserOptions, null, 2));
+    
     browser = await puppeteer.launch(browserOptions);
+    console.log(`✅ Browser ${browserIndex}: Successfully launched`);
 
     if (!browser) {
-      console.error(`❌ Browser from this ${browserIndex} of batch number ${batchNumber} failed to launch`);
+      console.error(`❌ Browser ${browserIndex} of batch number ${batchNumber} failed to launch - browser is null`);
       return {
         results: [],
-        error: `Browser launch failed`,
+        error: `Browser launch failed - browser is null`,
         browserIndex
       };
     }

@@ -94,11 +94,20 @@ export const optimisedBrowserArgs = [
 ];
 
 export const getBrowserOptions = async (): Promise<LaunchOptions> => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const executablePath = isProduction ? '/usr/bin/chromium-browser' : undefined;
+  
+  console.log("🔧 Browser Options:", {
+    isProduction,
+    executablePath,
+    headless: isProduction ? 'shell' : false,
+    argsCount: optimisedBrowserArgs.length
+  });
 
   return {
     channel: 'chrome',
-    headless: process.env.NODE_ENV === 'production' ? 'shell' : false,
-    executablePath: process.env.NODE_ENV === 'production' ? '/usr/bin/chromium' : undefined,
+    headless: isProduction ? 'shell' : false,
+    executablePath: executablePath,
     defaultViewport: null,
     args: [...optimisedBrowserArgs],
     timeout: 60000
