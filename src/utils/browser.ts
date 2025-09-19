@@ -93,7 +93,6 @@ export const getBrowserOptions = async (): Promise<LaunchOptions> => {
   const isProduction = process.env.NODE_ENV === 'production';
 
   return {
-    channel: 'chrome',
     headless: isProduction ? 'shell' : false,
     defaultViewport: null,
     args: [...optimisedBrowserArgs],
