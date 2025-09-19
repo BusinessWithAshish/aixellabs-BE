@@ -54,14 +54,26 @@ export const GmapsDetailsLeadInfoExtractor = async (url: string, page: Page): Pr
     await page.goto(url, { waitUntil: "networkidle2", timeout: DEFAULT_PAGE_LOAD_TIMEOUT });
 
     // Get HTML and URL, then immediately close page
-    const fullPageHTML = await page.content();
+    let fullPageHTML = await page.content();
     const gmapsUrl = page.url();
 
     // Close page immediately for speed
     await page.close();
 
     // Parse HTML using JSDOM locally
-    const dom = new JSDOM(fullPageHTML);
+    // const dom = new JSDOM(fullPageHTML);
+    // Remove all style tags and CSS to prevent parsing errors
+    fullPageHTML = fullPageHTML
+        .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi, '')
+        .replace(/style=["'][^"']*["']/gi, '');
+
+    const dom = new JSDOM(fullPageHTML, {
+        resources: "usable",
+        runScripts: "outside-only",
+        pretendToBeVisual: false,
+    });
+
     const document = dom.window.document;
 
     // Check if place is temporarily closed
