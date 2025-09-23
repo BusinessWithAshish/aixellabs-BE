@@ -26,6 +26,9 @@ sudo npm install -g pnpm
 echo "🌐 Installing Chromium..."
 sudo apt-get install -y chromium-browser || sudo apt-get install -y chromium
 
+sudo git clone https://github.com/BusinessWithAshish/aixellabs-BE.git
+cd aixellabs-BE
+
 # Install project dependencies
 echo "📂 Installing project dependencies..."
 pnpm install
