@@ -44,6 +44,6 @@ echo "✅ .env file created successfully!"
 
 # Start the app
 echo "🎯 Starting Node.js application..."
-pnpm run start &
+pnpm run start
 
 echo "🎉 Setup complete! Logs available at $LOGFILE"
