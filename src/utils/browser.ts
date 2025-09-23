@@ -95,6 +95,7 @@ export const getBrowserOptions = async (): Promise<LaunchOptions> => {
   return {
     headless: isProduction ? 'shell' : false,
     defaultViewport: null,
+      executablePath: isProduction ? '/usr/bin/chromium-browser' : undefined,
     args: [...optimisedBrowserArgs],
     timeout: 60000
   }

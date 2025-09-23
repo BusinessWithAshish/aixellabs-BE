@@ -33,39 +33,99 @@ export const GMAPS_SCRAPE =  async (req: Request, res: Response) => {
     return;
   }
 
+  // Set up Server-Sent Events headers for streaming
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  // Send initial message
+  res.write(`data: ${JSON.stringify({
+    type: 'status',
+    message: `Starting Google Maps scraping for "${parsedBody.data.query}" in ${parsedBody.data.states.length} states`,
+    data: { 
+      total: finalScrappingUrls.length,
+      stage: 'api_start'
+    },
+    timestamp: new Date().toISOString()
+  })}\n\n`);
+
   try {
-    const foundedLeads = await BrowserBatchHandler(finalScrappingUrls, scrapeLinks);
+    // Phase 1: Scrape business listing URLs
+    res.write(`data: ${JSON.stringify({
+      type: 'status',
+      message: 'Phase 1: Searching for business listings...',
+      data: { 
+        stage: 'phase_1_start',
+        phase: 1
+      },
+      timestamp: new Date().toISOString()
+    })}\n\n`);
+
+    const foundedLeads = await BrowserBatchHandler(finalScrappingUrls, scrapeLinks, res);
     
     const foundedLeadsResults = foundedLeads.results.flat();
+    
     if (foundedLeadsResults.length === 0) {
-      res.status(200).json({
-        success: true,
+      res.write(`data: ${JSON.stringify({
+        type: 'complete',
+        message: 'No business listings found',
         data: {
           founded: foundedLeadsResults,
           foundedLeadsCount: foundedLeadsResults.length,
           allLeads: [],
-          allLeadsCount: 0
-        }
-      });
+          allLeadsCount: 0,
+          stage: 'no_results'
+        },
+        timestamp: new Date().toISOString()
+      })}\n\n`);
+      res.end();
       return;
     }
 
-    const allLeads = await BrowserBatchHandler(foundedLeadsResults, GmapsDetailsLeadInfoExtractor);
+    // Phase 2: Extract detailed business information
+    res.write(`data: ${JSON.stringify({
+      type: 'status',
+      message: `Phase 2: Extracting details from ${foundedLeadsResults.length} business listings...`,
+      data: { 
+        stage: 'phase_2_start',
+        phase: 2,
+        total: foundedLeadsResults.length
+      },
+      timestamp: new Date().toISOString()
+    })}\n\n`);
+
+    const allLeads = await BrowserBatchHandler(foundedLeadsResults, GmapsDetailsLeadInfoExtractor, res);
     const allLeadsResults = allLeads.results.flat();
-    res.status(200).json({
-      success: true,
+    
+    // Send final results
+    res.write(`data: ${JSON.stringify({
+      type: 'complete',
+      message: 'Scraping completed successfully!',
       data: {
         founded: foundedLeadsResults,
         foundedLeadsCount: foundedLeadsResults.length,
         allLeads: allLeadsResults,
-        allLeadsCount: allLeadsResults.length
-      }
-    });
+        allLeadsCount: allLeadsResults.length,
+        stage: 'final_results'
+      },
+      timestamp: new Date().toISOString()
+    })}\n\n`);
+    
+    res.end();
   } catch (error) {
-    res.status(500).json({
-      success: false, 
-      error: "Internal server error during scraping",
-      details: error instanceof Error ? error.message : String(error)
-    });
+    res.write(`data: ${JSON.stringify({
+      type: 'error',
+      message: 'Scraping failed due to system error',
+      data: {
+        stage: 'api_error',
+        error: error instanceof Error ? error.message : String(error)
+      },
+      timestamp: new Date().toISOString()
+    })}\n\n`);
+    res.end();
   }
 };
