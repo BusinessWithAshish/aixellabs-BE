@@ -1,0 +1,94 @@
+openapi: 3.0.3
+info:
+  title: Aixellabs Google Maps Scraping API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8100
+paths:
+  /v1/ping:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /v1/test-browser:
+    get:
+      summary: Validate Puppeteer/Chromium environment
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+  /gmaps/scrape:
+    post:
+      summary: Scrape Google Maps listings and details (SSE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrapeRequest'
+      responses:
+        '200':
+          description: Event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /gmaps/search_scrape:
+    post:
+      summary: Search Google Places Text Search API and aggregate results
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScrapeRequest'
+      responses:
+        '200':
+          description: JSON containing aggregated places
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+components:
+  schemas:
+    ScrapeRequest:
+      type: object
+      required: [query, country, states]
+      properties:
+        query:
+          type: string
+          example: Digital marketing agencies
+        country:
+          type: string
+          example: India
+        states:
+          type: array
+          items:
+            type: object
+            required: [name, cities]
+            properties:
+              name:
+                type: string
+              cities:
+                type: array
+                items:
+                  type: string
+
